@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void read_file(string& file){
+StockMarket createMarketFromData(string& file){
 
     string text;
 
@@ -20,8 +20,8 @@ void read_file(string& file){
     string lastOrder;
 
     // Create Order oop
-    vector<LimitOrder> buyOrders;
-    vector<LimitOrder> sellOrders;
+    vector<Order> buyOrders;
+    vector<Order> sellOrders;
 
     ifstream File(file);
 
@@ -33,34 +33,42 @@ void read_file(string& file){
         File >> action;
         File >> type;
         File >> div;
+
         //Limit Order
         if(type == 'L'){
             File >> price;
             File >> quantity;
+
+            // Buy Order
+            if(action == 'B' && lastOrder != orderID){
+                lastOrder = orderID;
+                buyOrders.push_back(LimitOrder(orderID,action,type,div,price,quantity));
+            }
+            else if (action == 'S' && lastOrder != orderID){
+                lastOrder = orderID;
+                sellOrders.push_back(LimitOrder(orderID,action,type,div,price,quantity));
+            }
         }
+
         // Market Order
         else if(type == 'M') {
             // DO SMTH
         }
 
-//        // Buy Order
-        if(action == 'B' && lastOrder != orderID){
-            lastOrder = orderID;
-            buyOrders.push_back(LimitOrder(orderID,'a','b','c',price,quantity));
-        }
-        else if (action == 'S' && lastOrder != orderID){
-            lastOrder = orderID;
-            sellOrders.push_back(LimitOrder(orderID,action,type,div,price,quantity));
-        }
     }
 
     File.close();
-    for(int i=0;i != sellOrders.size(); i++){
-        cout << sellOrders[i].orderID_ << endl;
-    }
+//    for(int i=0;i != sellOrders.size(); i++){
+//        cout << sellOrders[i].orderID_ << endl;
+//    }
+    return StockMarket(buyOrders,sellOrders);
 }
 
 int main (int argc, char* argv[]) {
+    // Todo: Error handling for reading files
     string fileName(argv[1]);
-    read_file(fileName);
+    // Creating a Stock Market based on data from the file
+    StockMarket market = createMarketFromData(fileName);
+
+
 }

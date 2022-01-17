@@ -4,25 +4,42 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
-class Market {
+class Order;
+
+class StockMarket {
 
 public:
+    StockMarket(vector<Order> buyOrders, vector<Order> sellOrders);
+
+private:
+    vector<Order> buyOrders_;
+    vector<Order> sellOrders_;
+
 };
 
-class LimitOrder {
+class Order : public  StockMarket{
 
 public:
-    // Constructor of an Order
-    LimitOrder(string orderID, char action, char type, char div, float limitPrice, int quantity);
 
+protected:
     string orderID_;
-private:
     char action_;
     char type_;
     char div_;
+
+    Order(vector<Order> buyOrders, vector<Order> sellOrders, string orderID, char action, char type, char div);
+};
+
+class LimitOrder : public  Order{
+
+public:
+    // Constructor of an Order
+    LimitOrder(string orderId, char action, char type, char div, float limitPrice, int quantity);
+private:
     float limitPrice_;
     int quantity_;
 };
