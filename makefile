@@ -14,8 +14,14 @@
 # Actually, this is not a good example of using makefiles.
 # See the one in Assignment 1 for really using separate compilation.
 
-All: all
+All: all deepclean
 all: main
 
-main: main.cpp
-	g++ main.cpp -o main
+main: main.cpp StockMarket.o
+	g++ main.cpp StockMarket.o -o main
+
+deepclean:
+	rm -f *~ *.o main main.exe *.stackdump
+
+clean:
+	rm -f *~ *.o *.stackdump
