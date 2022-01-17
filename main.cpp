@@ -61,7 +61,7 @@ StockMarket createMarketFromData(string& file){
 //    for(int i=0;i != sellOrders.size(); i++){
 //        cout << sellOrders[i].orderID_ << endl;
 //    }
-    return StockMarket(buyOrders,sellOrders);
+    return StockMarket(buyOrders,sellOrders, lastPrice);
 }
 
 int main (int argc, char* argv[]) {

@@ -13,15 +13,22 @@ class Order;
 class StockMarket {
 
 public:
-    StockMarket(vector<Order> buyOrders, vector<Order> sellOrders);
+    StockMarket(vector<Order> buyOrders, vector<Order> sellOrders, float lastTradePrice);
+
+    const vector<Order> &getBuyOrders() const;
+
+    const vector<Order> &getSellOrders() const;
+
+    float getLastTradePrice() const;
 
 private:
+    float lastTradePrice_;
     vector<Order> buyOrders_;
     vector<Order> sellOrders_;
 
 };
 
-class Order : public  StockMarket{
+class Order {
 
 public:
 
@@ -31,10 +38,11 @@ protected:
     char type_;
     char div_;
 
-    Order(vector<Order> buyOrders, vector<Order> sellOrders, string orderID, char action, char type, char div);
+    Order(string orderID, char action, char type, char div);
+
 };
 
-class LimitOrder : public  Order{
+class LimitOrder : public Order{
 
 public:
     // Constructor of an Order
