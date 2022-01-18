@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <memory>
 
 
 // ================== StockMarket Class ==================
@@ -10,11 +11,11 @@ StockMarket::StockMarket(float lastTradePrice) {
     lastTradePrice_ = lastTradePrice;
 }
 
-const vector<Order> &StockMarket::getBuyOrders() const {
+const vector<shared_ptr<struct Order>> StockMarket::getBuyOrders() const {
     return buyOrders_;
 }
 
-const vector<Order> &StockMarket::getSellOrders() const {
+const vector<shared_ptr<struct Order>> StockMarket::getSellOrders() const {
     return sellOrders_;
 }
 
@@ -22,31 +23,36 @@ float StockMarket::getLastTradePrice() const {
     return lastTradePrice_;
 }
 
-void StockMarket::addOrder(Order order) {
-    if(order.getAction() == 'B'){
+void StockMarket::addOrder(shared_ptr<Order> order) {
+    if(order->getAction() == 'B'){
         buyOrders_.push_back(order);
     }
-    else if (order.getAction() == 'S'){
+    else if (order->getAction() == 'S'){
         sellOrders_.push_back(order);
     } else
         throw invalid_argument("This action for order is not supported");
 }
 
-vector<pair<Order,Order>> StockMarket::matchOrders() {
-    vector<pair<Order,Order>> matches;
+vector<pair<Order*,Order*>> StockMarket::matchOrders() {
+    vector<pair<Order*,Order*>> matches;
     if(getBuyOrders().empty() || getSellOrders().empty()){
         // DO NOTHING, since there's nothing to be matched against
         return matches;
     } else {
         for(auto buy = std::begin(buyOrders_); buy != std::end(buyOrders_); ++buy) {
             for(auto sell = std::begin(sellOrders_); sell != std::end(sellOrders_); ++sell) {
-                if(buy->getLimitPrice()>= sell->getLimitPrice() || (buy->getType() == 'M' || sell->getType() == 'M')){
+                if(buy->get()->getLimitPrice()>= sell->get()->getLimitPrice() || (buy->get()->getType() == 'M' || sell->get()->getType() == 'M')){
                     //Both Indivisible
-                    if(buy->getDiv() == 'I' && sell->getDiv() == 'I' && buy->getQuantity() == sell->getQuantity()){
-//                        matches.push_back(make_pair(buy,sell));
-//                        pair<Order,Order> m = make_pair(buy,sell);
-
-
+                    if(buy->get()->getDiv() == 'I' && sell->get()->getDiv() == 'I' && buy->get()->getQuantity() == sell->get()->getQuantity()){
+                        matches.push_back(make_pair(buy->get(),sell->get()));
+                    }
+                    else if ((buy->get()->getDiv() == 'I' && sell->get()->getDiv() == 'D')
+                            && sell->get()->getQuantity() >= buy->get()->getQuantity()){
+                        matches.push_back(make_pair(buy->get(),sell->get()));
+                    }
+                    else if ((buy->get()->getDiv() == 'D' && sell->get()->getDiv() == 'I')
+                             && sell->get()->getQuantity() <= buy->get()->getQuantity()) {
+                        matches.push_back(make_pair(buy->get(),sell->get()));
                     }
                 }
             }

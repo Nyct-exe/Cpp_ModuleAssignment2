@@ -96,7 +96,7 @@ int main (int argc, char* argv[]) {
             lastOrder = orderID;
             File >> price;
             File >> quantity;
-            stockMarket.addOrder(LimitOrder(age,orderID,action,type,div,quantity,price));
+            stockMarket.addOrder(make_unique<Order>(LimitOrder(age,orderID,action,type,div,quantity,price)));
         }
 
             // Market Order
@@ -106,6 +106,13 @@ int main (int argc, char* argv[]) {
         age++;
 
         // Match Orders
+        vector<pair<Order*,Order*>> matches = stockMarket.matchOrders();
+
+        for(int i=0;i != matches.size(); i++){
+            cout << matches[i].first->getOrderId() << " : " << matches[i].second->getOrderId() << endl;
+        }
+        cout << "************************************" << endl;
+
 
 
     }
@@ -113,9 +120,9 @@ int main (int argc, char* argv[]) {
     File.close();
     // For Testing
 
-    for(int i=0;i != stockMarket.getSellOrders().size(); i++){
-        cout << stockMarket.getSellOrders()[i].getOrderId() << endl;
-    }
+//    for(int i=0;i != stockMarket.getSellOrders().size(); i++){
+//        cout << stockMarket.getSellOrders()[i]->getOrderId() << endl;
+//    }
 
 
 }

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #include <utility>
-
+#include <memory>
 
 using namespace std;
 
@@ -18,22 +18,22 @@ public:
     StockMarket(float lastTradePrice);
 
     // Getters
-    const vector<Order> &getBuyOrders() const;
+    const vector<shared_ptr<struct Order>> getBuyOrders() const;
 
-    const vector<Order> &getSellOrders() const;
+    const vector<shared_ptr<struct Order>> getSellOrders() const;
 
     float getLastTradePrice() const;
 
     // Adds an order to sell/orders vector depending on action of an order
-    void addOrder(Order order);
+    void addOrder(shared_ptr<Order> order);
 
     // Match orders that could potentially be executed and returns a vector of pairs
-    vector<pair<Order,Order>> matchOrders();
+    vector<pair<Order*,Order*>> matchOrders();
 
 private:
     float lastTradePrice_;
-    vector<Order> buyOrders_;
-    vector<Order> sellOrders_;
+    vector<shared_ptr<Order>> buyOrders_;
+    vector<shared_ptr<Order>> sellOrders_;
 
 };
 
