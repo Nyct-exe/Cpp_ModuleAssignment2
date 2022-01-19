@@ -52,6 +52,7 @@ private:
     stringstream executionLogs_;
     deque<shared_ptr<Order>> buyOrders_;
     deque<shared_ptr<Order>> sellOrders_;
+    deque<shared_ptr<Order>> ordersByAge;
 
 };
 
@@ -73,7 +74,12 @@ public:
 
     int getQuantity() const;
 
-    virtual float getLimitPrice() const;
+    float getLimitPrice() const;
+
+    void setLimitPrice(float limitPrice);
+
+    void setQuantity(int quantity);
+
 
 protected:
     string orderID_;

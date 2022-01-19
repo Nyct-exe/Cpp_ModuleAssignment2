@@ -63,6 +63,9 @@ int main (int argc, char* argv[]) {
         //TODO: Order info and processed text afterwards
 
 //        stockMarket.terminalOutput();
+        // Checking Matches
+        for(auto it = begin(matches); it != end(matches); ++it)
+            cout << it->first->getOrderId() << " : " << it->second->getOrderId() << endl;
 
         stockMarket.executeOrders(matches);
 

@@ -47,8 +47,9 @@ void StockMarket::addOrder(shared_ptr<Order> order) {
             sellOrders_.push_back(order);
         }
 
-    } else
-        throw invalid_argument("This action for order is not supported");
+    }
+    // A Deque Sorted by Age (Needed for Output)
+    ordersByAge.push_back(order);
 }
 
 deque<pair<shared_ptr<Order>,shared_ptr<Order>>> StockMarket::matchOrders() {
@@ -69,13 +70,16 @@ deque<pair<shared_ptr<Order>,shared_ptr<Order>>> StockMarket::matchOrders() {
                     }
                     else if ((buy->get()->getDiv() == 'I' && sell->get()->getDiv() == 'D')
                              && sell->get()->getQuantity() >= buy->get()->getQuantity()){
+
                         matches.push_back((make_pair(*buy,*sell)));
                     }
                     else if ((buy->get()->getDiv() == 'D' && sell->get()->getDiv() == 'I')
                              && sell->get()->getQuantity() <= buy->get()->getQuantity()) {
+
                         matches.push_back((make_pair(*buy,*sell)));
                     }
                     else if (buy->get()->getDiv() == 'D' && sell->get()->getDiv() == 'D') {
+
                         matches.push_back((make_pair(*buy,*sell)));
                     }
                 }
@@ -93,6 +97,7 @@ deque<pair<shared_ptr<Order>,shared_ptr<Order>>> StockMarket::matchOrders() {
 //            }
 //        }
 //        return matches;
+    return matches;
     }
 }
 
@@ -101,36 +106,95 @@ void StockMarket::executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>>
 
     if (!matches.empty()) {
         for (auto it = std::begin(matches); it != std::end(matches); ++it) {
+
+            // Remembering Quantities initially
+           int buyQuantity = it->first->getQuantity();
+           int sellQuantity = it->second->getQuantity();
+
+           int purchaseQuantity;
+
             // Limited Orders
             if (it->first->getType() == 'L' && it->second->getType() == 'L') {
                 // InDivisible
                 if(it->first->getDiv() == 'I' && it->second->getDiv() == 'I'){
 
                     // If Equal Limit Prices Do It based on age
-                    if(it->first->getLimitPrice() == it->second->getLimitPrice()){
-                        if (it->first->getAge() < it->second->getAge()) {
-                            executionLogs_ << "order " << it->first->getOrderId() << " " << it->first->getQuantity()
-                                           << " shares purchased at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
-                            executionLogs_ << "order " << it->second->getOrderId() << " " << it->second->getQuantity()
-                                           << " shares sold at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
-                            lastTradePrice_ = it->first->getLimitPrice();
-                        }
-                        else if (it->first->getAge() > it->second->getAge()) {
-                            executionLogs_ << "order " << it->first->getOrderId() << " " << it->first->getQuantity()
-                                           << " shares purchased at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
-                            executionLogs_ << "order " << it->second->getOrderId() << " " << it->second->getQuantity()
-                                           << " shares sold at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
-                            lastTradePrice_ = it->second->getLimitPrice();
-                        }
-                    } else {
+//                    if(it->first->getLimitPrice() == it->second->getLimitPrice()){
+                    if(buyQuantity < sellQuantity)
+                        purchaseQuantity = buyQuantity;
+                    else
+                        purchaseQuantity = sellQuantity;
+
+                    if ((it->first->getAge() < it->second->getAge())) {
+                        executionLogs_ << "order " << it->first->getOrderId() << " " << purchaseQuantity
+                                       << " shares purchased at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+
+                        executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
+                                       << " shares sold at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+                        lastTradePrice_ = it->first->getLimitPrice();
+
+                    }
+                    else if (it->first->getAge() > it->second->getAge()) {
+                        executionLogs_ << "order " << it->first->getOrderId() << " " << purchaseQuantity
+                                       << " shares purchased at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+                        executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
+                                       << " shares sold at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+                        lastTradePrice_ = it->second->getLimitPrice();
 
                     }
 
-
+                    // Removing sold/bought Stock
+                    it->first->setQuantity(0);
+                    it->second->setQuantity(0);
+                        // Not Equal Limit Prices
+//                    } else {
+//                            //TODO
+//
+//                    }
+                    // Divisible
                 } else {
 
+                    // If Equal Limit Prices Do It based on age
+//                    if(it->first->getLimitPrice() == it->second->getLimitPrice()){
+                        if(buyQuantity < sellQuantity)
+                            purchaseQuantity = buyQuantity;
+                        else
+                            purchaseQuantity = sellQuantity;
+
+                        if ((it->first->getAge() < it->second->getAge())) {
+                            executionLogs_ << "order " << it->first->getOrderId() << " " << purchaseQuantity
+                                           << " shares purchased at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+
+                            executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
+                                           << " shares sold at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+                            lastTradePrice_ = it->first->getLimitPrice();
+
+                        }
+                        else if (it->first->getAge() > it->second->getAge()) {
+                            executionLogs_ << "order " << it->first->getOrderId() << " " << purchaseQuantity
+                                           << " shares purchased at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+                            executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
+                                           << " shares sold at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+                            lastTradePrice_ = it->second->getLimitPrice();
+
+                        }
+                        // Removing Quantity sold/bought
+
+                        if(buyQuantity > sellQuantity) {
+                            it->first.get()->setQuantity(buyQuantity - sellQuantity);
+                            it->second.get()->setQuantity(0);
+                        } else {
+                            it->first.get()->setQuantity(0);
+                            it->second.get()->setQuantity(sellQuantity - buyQuantity);
+                        }
+
+
+
+
+//                    }
 
                 }
+
 
             }
         }
@@ -140,10 +204,11 @@ void StockMarket::executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>>
 void StockMarket::removeMatches(deque<pair<shared_ptr<Order>,shared_ptr<Order>>> matchList) {
     if(!matchList.empty())
         for(auto match = std::begin(matchList); match != std::end(matchList); ++match) {
-            buyOrders_.erase(remove(buyOrders_.begin(),buyOrders_.end(), match->first), buyOrders_.end());
-            sellOrders_.erase(remove(sellOrders_.begin(), sellOrders_.end(),match->second), sellOrders_.end());
+            if(match->first->getType() == 'L' && match->first->getQuantity() == 0)
+                buyOrders_.erase(remove(buyOrders_.begin(),buyOrders_.end(), match->first), buyOrders_.end());
+            if(match->second->getType() == 'L' && match->second->getQuantity() == 0)
+                sellOrders_.erase(remove(sellOrders_.begin(), sellOrders_.end(),match->second), sellOrders_.end());
         }
-    matchList.clear();
 }
 
 void StockMarket::terminalOutput() {
@@ -164,12 +229,13 @@ void StockMarket::fileOutput() {
 
     File <<  executionLogs_.str();
 
-    if(!buyOrders_.empty())
-        for(auto it = std::begin(buyOrders_); it != std::end(buyOrders_); ++it)
-            File << "order " << it->get()->getOrderId() << " " << it->get()->getQuantity() << " shares unexecuted" << "\n";
-    if(!sellOrders_.empty())
-        for(auto it = std::begin(sellOrders_); it != std::end(sellOrders_); ++it)
-            File << "order " << it->get()->getOrderId() << " " << it->get()->getQuantity() << " shares unexecuted" << "\n";
+
+    // File Output
+
+    if(!ordersByAge.empty())
+        for(auto it = std::begin(ordersByAge); it != std::end(ordersByAge); ++it)
+            if(it->get()->getQuantity() != 0)
+                File << "order " << it->get()->getOrderId() << " " << it->get()->getQuantity() << " shares unexecuted" << "\n";
 
     File.close();
 
@@ -215,4 +281,12 @@ int Order::getQuantity() const {
 
 float Order::getLimitPrice() const {
     return limitPrice_;
+}
+
+void Order::setLimitPrice(float limitPrice) {
+    limitPrice_ = limitPrice;
+}
+
+void Order::setQuantity(int quantity) {
+    quantity_ = quantity;
 };
