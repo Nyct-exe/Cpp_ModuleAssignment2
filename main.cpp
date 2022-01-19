@@ -2,69 +2,13 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <limits>
+#include <iomanip>
+#include <sstream>
 
 using namespace std;
 
-//void createMarketFromData(string& file){
-//
-//    string text;
-//    int age = 0;
-//
-//    // Order Variables
-//    string orderID;
-//    char action;
-//    char type;
-//    char div;
-//    float price;
-//    int quantity;
-//
-//    string lastOrder;
-//
-//    ifstream File(file);
-//
-//
-//    float lastPrice;
-//    File >> lastPrice;
-//    // Creating an instace of stock market to store buy/sell orders
-//    StockMarket stockMarket = StockMarket(lastPrice);
-//
-//
-//    while (getline(File, text)){
-//        File >> orderID;
-//        File >> action;
-//        File >> type;
-//        File >> div;
-//
-//        //Limit Order
-//        if(type == 'L' && lastOrder != orderID){
-//            lastOrder = orderID;
-//            File >> price;
-//            File >> quantity;
-//            stockMarket.addOrder(LimitOrder(orderID,action,type,div,price,quantity,age));
-//        }
-//
-//        // Market Order
-//        else if(type == 'M') {
-//            // DO SMTH
-//        }
-//        age++;
-//
-//    }
-//
-//    File.close();
-//    for(int i=0;i != stockMarket.getSellOrders().size(); i++){
-//        cout << stockMarket.getSellOrders()[i].getOrderId() << endl;
-//    }
-//}
-
 int main (int argc, char* argv[]) {
-    // Todo: Error handling for reading files
-    string fileName(argv[1]);
-    // Creating a Stock Market based on data from the file
-//    StockMarket market = createMarketFromData(fileName);
-
-    string text;
-    int age = 0;
 
     // Order Variables
     string orderID;
@@ -73,56 +17,69 @@ int main (int argc, char* argv[]) {
     char div;
     float price;
     int quantity;
+    int age = 0;
+
+    // stores file text
+    string text;
+
+    string executionLog;
 
     string lastOrder;
-
-    ifstream File(fileName);
-
-
     float lastPrice;
-    File >> lastPrice;
+
+
+    //Opens a file to read
+    ifstream File(argv[1]);
+    File >>lastPrice;
+
     // Creating an instace of stock market to store buy/sell orders
     StockMarket stockMarket = StockMarket(lastPrice);
-
-
     while (getline(File, text)){
         File >> orderID;
         File >> action;
         File >> type;
         File >> div;
-
-        //Limit Order
-        if(type == 'L' && lastOrder != orderID){
+        File >> price;
+        File >> quantity;
+        if(orderID != lastOrder){
+            stockMarket.addOrder(make_shared<Order>(Order(age,orderID,action,type,div,quantity,price)));
             lastOrder = orderID;
-            File >> price;
-            File >> quantity;
-            stockMarket.addOrder(make_unique<Order>(LimitOrder(age,orderID,action,type,div,quantity,price)));
         }
 
-            // Market Order
-        else if(type == 'M') {
-            // DO SMTH
-        }
         age++;
 
-        // Match Orders
-        vector<pair<Order*,Order*>> matches = stockMarket.matchOrders();
+        //TODO: After adding the order to the stockmarket we need to match it with existing orders
+        vector<pair<shared_ptr<Order>,shared_ptr<Order>>> matches = stockMarket.matchOrders();
 
-        for(int i=0;i != matches.size(); i++){
-            cout << matches[i].first->getOrderId() << " : " << matches[i].second->getOrderId() << endl;
-        }
-        cout << "************************************" << endl;
+//        if(!test.empty())
+//            for(auto it = std::begin(test); it != std::end(test); ++it) {
+//                std::cout << it->first.getOrderId() << " : " << it->second.getOrderId() << "\n";
+//            }
 
+        cout << "latest price: " << stockMarket.getLastTradePrice() << fixed << setprecision(2) << endl;
+        cout << "buy" << "                       |" << " sell                 " << endl;
+        cout << "=============================================" << endl;
+
+        //TODO: Order info and processed text afterwards
+
+//        stockMarket.terminalOutput();
+
+        stockMarket.executeOrders(matches);
+
+        stockMarket.removeMatches(matches);
+
+
+
+        cout << "Press 'Enter' to Continue...";
+        cin.ignore(std::numeric_limits<streamsize>::max(),'\n');
 
 
     }
 
     File.close();
-    // For Testing
 
-//    for(int i=0;i != stockMarket.getSellOrders().size(); i++){
-//        cout << stockMarket.getSellOrders()[i]->getOrderId() << endl;
-//    }
+    stockMarket.fileOutput();
 
+//    cout << "TEST: " << stockMarket.getSellOrders()[0]->getOrderId() << endl;
 
 }

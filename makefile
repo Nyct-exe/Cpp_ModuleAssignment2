@@ -14,11 +14,15 @@
 # Actually, this is not a good example of using makefiles.
 # See the one in Assignment 1 for really using separate compilation.
 
-All: all deepclean
+CXX     = g++
+
+CXXFLAGS = -O0 -g3 -std=c++14
+
+All: all
 all: main
 
 main: main.cpp StockMarket.o
-	g++ main.cpp StockMarket.o -o main
+	$(CXX) $(CXXFLAGS) main.cpp StockMarket.o -o main
 
 deepclean:
 	rm -f *~ *.o main main.exe *.stackdump

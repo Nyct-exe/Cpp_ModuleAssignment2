@@ -1,5 +1,5 @@
-#ifndef STOCKMARKET_H_
-#define STOCKMARKET_H_
+#ifndef NEWLIFE_STOCKMARKET_H
+#define NEWLIFE_STOCKMARKET_H
 
 #include <iostream>
 #include <fstream>
@@ -7,6 +7,7 @@
 #include <vector>
 #include <utility>
 #include <memory>
+#include <sstream>
 
 using namespace std;
 
@@ -17,21 +18,37 @@ class StockMarket {
 public:
     StockMarket(float lastTradePrice);
 
-    // Getters
+    // Getters/Setters
     const vector<shared_ptr<struct Order>> getBuyOrders() const;
 
     const vector<shared_ptr<struct Order>> getSellOrders() const;
 
     float getLastTradePrice() const;
 
+    void setLastTradePrice(float lastTradePrice);
+
     // Adds an order to sell/orders vector depending on action of an order
     void addOrder(shared_ptr<Order> order);
 
+    // Removes Matches from the buy/sell orders
+    void removeMatches(vector<pair<shared_ptr<Order>,shared_ptr<Order>>> matchList);
+
     // Match orders that could potentially be executed and returns a vector of pairs
-    vector<pair<Order*,Order*>> matchOrders();
+    vector<pair<shared_ptr<Order>,shared_ptr<Order>>>  matchOrders();
+
+    //Executes Orders that are matched
+    void executeOrders(vector<pair<shared_ptr<Order>,shared_ptr<Order>>> matches);
+
+    //Outputs to File
+    void fileOutput();
+
+
+    // Generates Output to the Terminal
+    void terminalOutput();
 
 private:
     float lastTradePrice_;
+    stringstream executionLogs_;
     vector<shared_ptr<Order>> buyOrders_;
     vector<shared_ptr<Order>> sellOrders_;
 
@@ -41,6 +58,7 @@ class Order {
 
 public:
 
+    Order(int age, string orderID, char action, char type, char div,int quantity, float limitPrice = 0);
 
     const string &getOrderId() const;
 
@@ -67,27 +85,7 @@ protected:
     int quantity_;
     float limitPrice_;
     // Order Constructor
-    Order(int age, string orderID, char action, char type, char div,int quantity, float limitPrice = 0);
 
 };
 
-class LimitOrder : public Order{
-
-public:
-    // Constructor of an Order
-    LimitOrder(int age, string orderId, char action, char type, char div,int quantity, float limitPrice);
-
-    float getLimitPrice() const override;
-
-    int getQuantity() const;
-
-private:
-};
-
-class test {
-public:
-    test(string text);
-    string message;
-};
-
-#endif //STOCKMARKET_H_
+#endif //NEWLIFE_STOCKMARKET_H
