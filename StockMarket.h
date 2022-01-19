@@ -27,7 +27,7 @@ public:
 
     void setLastTradePrice(float lastTradePrice);
 
-    // Adds an order to sell/orders vector depending on action of an order
+    // Adds an order to sell/orders vector depending on action of an order and sorts it by priority
     void addOrder(shared_ptr<Order> order);
 
     // Removes Matches from the buy/sell orders

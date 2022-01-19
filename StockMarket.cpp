@@ -26,6 +26,8 @@ float StockMarket::getLastTradePrice() const {
 }
 
 void StockMarket::addOrder(shared_ptr<Order> order) {
+
+
     if(order->getAction() == 'B'){
         buyOrders_.push_back(order);
     }
@@ -81,25 +83,41 @@ vector<pair<shared_ptr<Order>,shared_ptr<Order>>> StockMarket::matchOrders() {
 }
 
 void StockMarket::executeOrders(vector<pair<shared_ptr<Order>,shared_ptr<Order>>>  matches) {
-    // Stores executed actions
+
 
     if (!matches.empty()) {
         for (auto it = std::begin(matches); it != std::end(matches); ++it) {
+            // Limited Orders
             if (it->first->getType() == 'L' && it->second->getType() == 'L') {
-                if (it->first->getAge() < it->second->getAge()) {
-                    executionLogs_ << "order " << it->first->getOrderId() << " " << it->first->getQuantity()
-                                   << " shares purchased at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
-                    executionLogs_ << "order " << it->second->getOrderId() << " " << it->second->getQuantity()
-                                   << " shares sold at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
-                    lastTradePrice_ = it->first->getLimitPrice();
+                // InDivisible
+                if(it->first->getDiv() == 'I' && it->second->getDiv() == 'I'){
+
+                    // If Equal Limit Prices Do It based on age
+                    if(it->first->getLimitPrice() == it->second->getLimitPrice()){
+                        if (it->first->getAge() < it->second->getAge()) {
+                            executionLogs_ << "order " << it->first->getOrderId() << " " << it->first->getQuantity()
+                                           << " shares purchased at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+                            executionLogs_ << "order " << it->second->getOrderId() << " " << it->second->getQuantity()
+                                           << " shares sold at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+                            lastTradePrice_ = it->first->getLimitPrice();
+                        }
+                        else if (it->first->getAge() > it->second->getAge()) {
+                            executionLogs_ << "order " << it->first->getOrderId() << " " << it->first->getQuantity()
+                                           << " shares purchased at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+                            executionLogs_ << "order " << it->second->getOrderId() << " " << it->second->getQuantity()
+                                           << " shares sold at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+                            lastTradePrice_ = it->second->getLimitPrice();
+                        }
+                    } else {
+
+                    }
+
+
+                } else {
+
+
                 }
-                else if (it->first->getAge() > it->second->getAge()) {
-                    executionLogs_ << "order " << it->first->getOrderId() << " " << it->first->getQuantity()
-                                   << " shares purchased at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
-                    executionLogs_ << "order " << it->second->getOrderId() << " " << it->second->getQuantity()
-                                   << " shares sold at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
-                    lastTradePrice_ = it->second->getLimitPrice();
-                }
+
             }
         }
     }
