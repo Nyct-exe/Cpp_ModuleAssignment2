@@ -71,7 +71,7 @@ int main (int argc, char* argv[]) {
 
 
         cout << "Press 'Enter' to Continue...";
-        cin.ignore(std::numeric_limits<streamsize>::max(),'\n');
+//        cin.ignore(std::numeric_limits<streamsize>::max(),'\n');
 
 
     }

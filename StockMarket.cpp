@@ -88,10 +88,17 @@ void StockMarket::executeOrders(vector<pair<shared_ptr<Order>,shared_ptr<Order>>
             if (it->first->getType() == 'L' && it->second->getType() == 'L') {
                 if (it->first->getAge() < it->second->getAge()) {
                     executionLogs_ << "order " << it->first->getOrderId() << " " << it->first->getQuantity()
-                                   << " shares purchased at price " << it->first->getLimitPrice() << endl;
+                                   << " shares purchased at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
                     executionLogs_ << "order " << it->second->getOrderId() << " " << it->second->getQuantity()
-                                   << " shares sold at price " << it->second->getLimitPrice() << endl;
+                                   << " shares sold at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
                     lastTradePrice_ = it->first->getLimitPrice();
+                }
+                else if (it->first->getAge() > it->second->getAge()) {
+                    executionLogs_ << "order " << it->first->getOrderId() << " " << it->first->getQuantity()
+                                   << " shares purchased at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+                    executionLogs_ << "order " << it->second->getOrderId() << " " << it->second->getQuantity()
+                                   << " shares sold at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+                    lastTradePrice_ = it->second->getLimitPrice();
                 }
             }
         }
