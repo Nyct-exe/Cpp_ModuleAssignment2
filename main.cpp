@@ -1,6 +1,6 @@
 #include "StockMarket.h"
 #include <string>
-#include <vector>
+#include <deque>
 #include <iostream>
 #include <limits>
 #include <iomanip>
@@ -49,7 +49,7 @@ int main (int argc, char* argv[]) {
         age++;
 
         //TODO: After adding the order to the stockmarket we need to match it with existing orders
-        vector<pair<shared_ptr<Order>,shared_ptr<Order>>> matches = stockMarket.matchOrders();
+        deque<pair<shared_ptr<Order>,shared_ptr<Order>>> matches = stockMarket.matchOrders();
 
 //        if(!test.empty())
 //            for(auto it = std::begin(test); it != std::end(test); ++it) {

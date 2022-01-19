@@ -4,10 +4,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
+#include <deque>
 #include <utility>
 #include <memory>
 #include <sstream>
+#include <deque>
 
 using namespace std;
 
@@ -19,25 +20,25 @@ public:
     StockMarket(float lastTradePrice);
 
     // Getters/Setters
-    const vector<shared_ptr<struct Order>> getBuyOrders() const;
+    const deque<shared_ptr<struct Order>> getBuyOrders() const;
 
-    const vector<shared_ptr<struct Order>> getSellOrders() const;
+    const deque<shared_ptr<struct Order>> getSellOrders() const;
 
     float getLastTradePrice() const;
 
     void setLastTradePrice(float lastTradePrice);
 
-    // Adds an order to sell/orders vector depending on action of an order and sorts it by priority
+    // Adds an order to sell/orders deque depending on action of an order and sorts it by priority
     void addOrder(shared_ptr<Order> order);
 
     // Removes Matches from the buy/sell orders
-    void removeMatches(vector<pair<shared_ptr<Order>,shared_ptr<Order>>> matchList);
+    void removeMatches(deque<pair<shared_ptr<Order>,shared_ptr<Order>>> matchList);
 
-    // Match orders that could potentially be executed and returns a vector of pairs
-    vector<pair<shared_ptr<Order>,shared_ptr<Order>>>  matchOrders();
+    // Match orders that could potentially be executed and returns a deque of pairs
+    deque<pair<shared_ptr<Order>,shared_ptr<Order>>>  matchOrders();
 
     //Executes Orders that are matched
-    void executeOrders(vector<pair<shared_ptr<Order>,shared_ptr<Order>>> matches);
+    void executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>> matches);
 
     //Outputs to File
     void fileOutput();
@@ -49,8 +50,8 @@ public:
 private:
     float lastTradePrice_;
     stringstream executionLogs_;
-    vector<shared_ptr<Order>> buyOrders_;
-    vector<shared_ptr<Order>> sellOrders_;
+    deque<shared_ptr<Order>> buyOrders_;
+    deque<shared_ptr<Order>> sellOrders_;
 
 };
 

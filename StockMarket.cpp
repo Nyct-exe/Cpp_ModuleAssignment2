@@ -13,11 +13,11 @@ StockMarket::StockMarket(float lastTradePrice) {
     lastTradePrice_ = lastTradePrice;
 }
 
-const vector<shared_ptr<struct Order>> StockMarket::getBuyOrders() const {
+const deque<shared_ptr<struct Order>> StockMarket::getBuyOrders() const {
     return buyOrders_;
 }
 
-const vector<shared_ptr<struct Order>> StockMarket::getSellOrders() const {
+const deque<shared_ptr<struct Order>> StockMarket::getSellOrders() const {
     return sellOrders_;
 }
 
@@ -27,19 +27,33 @@ float StockMarket::getLastTradePrice() const {
 
 void StockMarket::addOrder(shared_ptr<Order> order) {
 
-
     if(order->getAction() == 'B'){
-        buyOrders_.push_back(order);
+        if(!buyOrders_.empty()) {
+            if ((order->getLimitPrice() > buyOrders_.front()->getLimitPrice()) || (order->getType() == 'M'))
+                buyOrders_.push_front(order);
+            else
+                buyOrders_.push_back(order);
+        } else {
+            buyOrders_.push_back(order);
+        }
     }
     else if (order->getAction() == 'S'){
-        sellOrders_.push_back(order);
+        if(!sellOrders_.empty()){
+            if((order->getLimitPrice() < sellOrders_.front()->getLimitPrice()) || (order->getType() == 'M' ))
+                sellOrders_.push_front(order);
+            else
+                sellOrders_.push_back(order);
+        } else {
+            sellOrders_.push_back(order);
+        }
+
     } else
         throw invalid_argument("This action for order is not supported");
 }
 
-vector<pair<shared_ptr<Order>,shared_ptr<Order>>> StockMarket::matchOrders() {
+deque<pair<shared_ptr<Order>,shared_ptr<Order>>> StockMarket::matchOrders() {
 
-    vector<pair<shared_ptr<Order> ,shared_ptr<Order>>> matches;
+    deque<pair<shared_ptr<Order> ,shared_ptr<Order>>> matches;
     if(getBuyOrders().empty() || getSellOrders().empty()){
         // DO NOTHING, since there's nothing to be matched against
         return matches;
@@ -82,7 +96,7 @@ vector<pair<shared_ptr<Order>,shared_ptr<Order>>> StockMarket::matchOrders() {
     }
 }
 
-void StockMarket::executeOrders(vector<pair<shared_ptr<Order>,shared_ptr<Order>>>  matches) {
+void StockMarket::executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>>  matches) {
 
 
     if (!matches.empty()) {
@@ -123,7 +137,7 @@ void StockMarket::executeOrders(vector<pair<shared_ptr<Order>,shared_ptr<Order>>
     }
 }
 
-void StockMarket::removeMatches(vector<pair<shared_ptr<Order>,shared_ptr<Order>>> matchList) {
+void StockMarket::removeMatches(deque<pair<shared_ptr<Order>,shared_ptr<Order>>> matchList) {
     if(!matchList.empty())
         for(auto match = std::begin(matchList); match != std::end(matchList); ++match) {
             buyOrders_.erase(remove(buyOrders_.begin(),buyOrders_.end(), match->first), buyOrders_.end());
