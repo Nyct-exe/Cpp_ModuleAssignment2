@@ -32,7 +32,7 @@ int main (int argc, char* argv[]) {
     ifstream File(argv[1]);
     File >>lastPrice;
 
-    // Creating an instace of stock market to store buy/sell orders
+    // Creating an instance of stock market to store buy/sell orders
     StockMarket stockMarket = StockMarket(lastPrice);
     while (getline(File, text)){
         File >> orderID;
@@ -42,6 +42,8 @@ int main (int argc, char* argv[]) {
         // Only gets price if its a Limit Order
         if(type == 'L')
             File >> price;
+        else
+            price = stockMarket.getLastTradePrice();
         File >> quantity;
         if(orderID != lastOrder){
             stockMarket.addOrder(make_shared<Order>(Order(age,orderID,action,type,div,quantity,price)));
@@ -58,8 +60,8 @@ int main (int argc, char* argv[]) {
 //                std::cout << it->first.getOrderId() << " : " << it->second.getOrderId() << "\n";
 //            }
 
-        cout << "latest price: " << stockMarket.getLastTradePrice() << fixed << setprecision(2) << endl;
-        cout << "buy" << "                       |" << " sell                 " << endl;
+//        cout << "latest price: " << stockMarket.getLastTradePrice() << fixed << setprecision(2) << endl;
+//        cout << "buy" << "                       |" << " sell                 " << endl;
         cout << "=============================================" << endl;
 
         //TODO: Order info and processed text afterwards
@@ -75,7 +77,7 @@ int main (int argc, char* argv[]) {
 
 
 
-        cout << "Press 'Enter' to Continue...";
+//        cout << "Press 'Enter' to Continue...";
 //        cin.ignore(std::numeric_limits<streamsize>::max(),'\n');
 
 

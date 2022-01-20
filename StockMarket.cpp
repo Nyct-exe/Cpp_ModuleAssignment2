@@ -26,12 +26,11 @@ float StockMarket::getLastTradePrice() const {
 }
 
 void StockMarket::addOrder(shared_ptr<Order> order) {
-
     if(order->getAction() == 'B'){
         if(!buyOrders_.empty()) {
             if ((order->getLimitPrice() > buyOrders_.front()->getLimitPrice()) || (order->getType() == 'M'))
                 buyOrders_.push_front(order);
-            else
+            else if ((order->getLimitPrice() < buyOrders_.front()->getLimitPrice()) || (order->getType() != 'M'))
                 buyOrders_.push_back(order);
         } else {
             buyOrders_.push_back(order);
@@ -53,6 +52,23 @@ void StockMarket::addOrder(shared_ptr<Order> order) {
 }
 
 deque<pair<shared_ptr<Order>,shared_ptr<Order>>> StockMarket::matchOrders() {
+
+    // Sorting Buy/sell orders Dequeues (Don't need to sort by age for Market types since on adding its always added to the front of dequeue)
+    sort(buyOrders_.begin(),buyOrders_.end(),[](const shared_ptr<Order>& a, const shared_ptr<Order>& b){
+        if(((a->getLimitPrice() == b->getLimitPrice()) && (a->getType() != 'M' || b->getType() != 'M')) ){
+            return a->getAge() < b->getAge();
+        }
+        else if ((a->getType() != 'M' || b->getType() != 'M'))
+            return (a->getLimitPrice() > b->getLimitPrice());
+    });
+
+    sort(sellOrders_.begin(),sellOrders_.end(),[](const shared_ptr<Order>& a, const shared_ptr<Order>& b){
+        if(((a->getLimitPrice() == b->getLimitPrice()) && (a->getType() != 'M' || b->getType() != 'M')) ){
+            return a->getAge() < b->getAge();
+        }
+        else if ((a->getType() != 'M' || b->getType() != 'M'))
+            return (a->getLimitPrice() < b->getLimitPrice());
+    });
 
     deque<pair<shared_ptr<Order> ,shared_ptr<Order>>> matches;
     if(getBuyOrders().empty() || getSellOrders().empty()){
@@ -93,6 +109,7 @@ void StockMarket::executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>>
 
 
     if (!matches.empty()) {
+
         for (auto it = std::begin(matches); it != std::end(matches); ++it) {
             if(it->first->getQuantity() == 0 || it->second->getQuantity() == 0)
                 break;
@@ -200,15 +217,15 @@ void StockMarket::executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>>
 
                     executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
                                    << " shares sold at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
-                    lastTradePrice_ = it->first->getLimitPrice();
+                    lastTradePrice_ = it->second->getLimitPrice();
 
                 }
                 else if (it->first->getType() == 'L' && it->second->getType() == 'M'){
                     executionLogs_ << "order " << it->first->getOrderId() << " " << purchaseQuantity
-                    << " shares purchased at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+                    << " shares purchased at price " <<  it->first->getLimitPrice() << fixed << setprecision(2) << endl;
 
                     executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
-                    << " shares sold at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+                    << " shares sold at price " <<  it->first->getLimitPrice() << fixed << setprecision(2) << endl;
                     lastTradePrice_ = it->first->getLimitPrice();
                 } else {
                         executionLogs_ << "order " << it->first->getOrderId() << " " << purchaseQuantity
@@ -216,7 +233,6 @@ void StockMarket::executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>>
 
                         executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
                         << " shares sold at price " << lastTradePrice_ << fixed << setprecision(2) << endl;
-                        lastTradePrice_ = it->first->getLimitPrice();
                 }
 
                 // Removing Quantity sold/bought
@@ -262,9 +278,7 @@ void StockMarket::fileOutput() {
 
     File <<  executionLogs_.str();
 
-
     // File Output
-
     if(!ordersByAge.empty())
         for(auto it = std::begin(ordersByAge); it != std::end(ordersByAge); ++it)
             if(it->get()->getQuantity() != 0)

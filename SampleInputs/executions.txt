@@ -1,4 +1,4 @@
-order bob 5 shares purchased at price 1101
+order bob 5 shares purchased at price 1101.00
 order carol 5 shares sold at price 1101.00
 order bob 95 shares purchased at price 1101.00
 order musk 95 shares sold at price 1101.00
@@ -10,5 +10,4 @@ order alice 10 shares purchased at price 1099.00
 order musk 10 shares sold at price 1099.00
 order fred 1 shares purchased at price 900.00
 order musk 1 shares sold at price 900.00
-
 order musk 774 shares unexecuted
