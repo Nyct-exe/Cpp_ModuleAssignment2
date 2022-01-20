@@ -39,7 +39,9 @@ int main (int argc, char* argv[]) {
         File >> action;
         File >> type;
         File >> div;
-        File >> price;
+        // Only gets price if its a Limit Order
+        if(type == 'L')
+            File >> price;
         File >> quantity;
         if(orderID != lastOrder){
             stockMarket.addOrder(make_shared<Order>(Order(age,orderID,action,type,div,quantity,price)));

@@ -61,42 +61,30 @@ deque<pair<shared_ptr<Order>,shared_ptr<Order>>> StockMarket::matchOrders() {
     } else {
         for(auto buy = std::begin(buyOrders_); buy != std::end(buyOrders_); ++buy) {
             for(auto sell = std::begin(sellOrders_); sell != std::end(sellOrders_); ++sell) {
-                if(buy->get()->getLimitPrice()>= sell->get()->getLimitPrice() || (buy->get()->getType() == 'M' || sell->get()->getType() == 'M')){
+                if((buy->get()->getLimitPrice() >= sell->get()->getLimitPrice()) || (buy->get()->getType() == 'M' || sell->get()->getType() == 'M')){
                     //Both Indivisible
-                    if(buy->get()->getDiv() == 'I' && sell->get()->getDiv() == 'I'
-                       && buy->get()->getQuantity() == sell->get()->getQuantity()){
+                    if((buy->get()->getDiv() == 'I' && sell->get()->getDiv() == 'I')
+                       && (buy->get()->getQuantity() == sell->get()->getQuantity())){
 
                         matches.push_back((make_pair(*buy,*sell)));
                     }
                     else if ((buy->get()->getDiv() == 'I' && sell->get()->getDiv() == 'D')
-                             && sell->get()->getQuantity() >= buy->get()->getQuantity()){
+                             && (sell->get()->getQuantity() >= buy->get()->getQuantity())){
 
                         matches.push_back((make_pair(*buy,*sell)));
                     }
                     else if ((buy->get()->getDiv() == 'D' && sell->get()->getDiv() == 'I')
-                             && sell->get()->getQuantity() <= buy->get()->getQuantity()) {
+                             && (sell->get()->getQuantity() <= buy->get()->getQuantity())) {
 
                         matches.push_back((make_pair(*buy,*sell)));
                     }
-                    else if (buy->get()->getDiv() == 'D' && sell->get()->getDiv() == 'D') {
+                    else if ((buy->get()->getDiv() == 'D' && sell->get()->getDiv() == 'D')) {
 
                         matches.push_back((make_pair(*buy,*sell)));
                     }
                 }
             }
         }
-        // Needs further testing
-//        // Making sure Matches are matched according to priority
-//        for(auto it = std::begin(matches); it != std::end(matches); ++it) {
-//            for(auto rit = std::rbegin(matches); rit != std::rend(matches); ++rit) {
-//                //consider changing
-//                pair<Order*, Order*> firstPair = make_pair(it->first,it->second);
-//                if((it->first == rit->first) && (it->second != rit->second)){
-//                    // DO Nothing For now
-//                }
-//            }
-//        }
-//        return matches;
     return matches;
     }
 }
@@ -106,7 +94,8 @@ void StockMarket::executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>>
 
     if (!matches.empty()) {
         for (auto it = std::begin(matches); it != std::end(matches); ++it) {
-
+            if(it->first->getQuantity() == 0 || it->second->getQuantity() == 0)
+                break;
             // Remembering Quantities initially
            int buyQuantity = it->first->getQuantity();
            int sellQuantity = it->second->getQuantity();
@@ -180,7 +169,7 @@ void StockMarket::executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>>
                         }
                         // Removing Quantity sold/bought
 
-                        if(buyQuantity > sellQuantity) {
+                        if(buyQuantity >= sellQuantity) {
                             it->first.get()->setQuantity(buyQuantity - sellQuantity);
                             it->second.get()->setQuantity(0);
                         } else {
@@ -195,6 +184,50 @@ void StockMarket::executeOrders(deque<pair<shared_ptr<Order>,shared_ptr<Order>>>
 
                 }
 
+
+            }
+            // Market Order
+            if(it->first.get()->getType() == 'M' || it->second.get()->getType() == 'M' ) {
+
+                if(buyQuantity < sellQuantity)
+                    purchaseQuantity = buyQuantity;
+                else
+                    purchaseQuantity = sellQuantity;
+
+                if(it->first.get()->getType() == 'M' && it->second->getType() == 'L'){
+                    executionLogs_ << "order " << it->first->getOrderId() << " " << purchaseQuantity
+                                   << " shares purchased at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+
+                    executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
+                                   << " shares sold at price " << it->second->getLimitPrice() << fixed << setprecision(2) << endl;
+                    lastTradePrice_ = it->first->getLimitPrice();
+
+                }
+                else if (it->first->getType() == 'L' && it->second->getType() == 'M'){
+                    executionLogs_ << "order " << it->first->getOrderId() << " " << purchaseQuantity
+                    << " shares purchased at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+
+                    executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
+                    << " shares sold at price " << it->first->getLimitPrice() << fixed << setprecision(2) << endl;
+                    lastTradePrice_ = it->first->getLimitPrice();
+                } else {
+                        executionLogs_ << "order " << it->first->getOrderId() << " " << purchaseQuantity
+                        << " shares purchased at price " << lastTradePrice_ << fixed << setprecision(2) << endl;
+
+                        executionLogs_ << "order " << it->second->getOrderId() << " " << purchaseQuantity
+                        << " shares sold at price " << lastTradePrice_ << fixed << setprecision(2) << endl;
+                        lastTradePrice_ = it->first->getLimitPrice();
+                }
+
+                // Removing Quantity sold/bought
+
+                if(buyQuantity >= sellQuantity) {
+                    it->first.get()->setQuantity(buyQuantity - sellQuantity);
+                    it->second.get()->setQuantity(0);
+                } else {
+                    it->first.get()->setQuantity(0);
+                    it->second.get()->setQuantity(sellQuantity - buyQuantity);
+                }
 
             }
         }
