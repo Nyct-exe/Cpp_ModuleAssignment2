@@ -50,7 +50,7 @@ private:
     // Stores all sell orders
     deque<shared_ptr<Order>> sellOrders_;
     // Stores all orders that are coming in and sorts by age
-    deque<shared_ptr<Order>> ordersByAge;
+    deque<shared_ptr<Order>> ordersByAge_;
 
 };
 
